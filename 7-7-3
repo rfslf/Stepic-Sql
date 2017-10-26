@@ -1,0 +1,19 @@
+WITH cte AS
+  ( SELECT 
+        m.*, 
+        ( SELECT COUNT(*) 
+          FROM KeywordLtree AS d
+          WHERE m.path @> d.path
+        ) AS descendants,
+        ( SELECT COUNT(*) 
+          FROM KeywordLtree AS a
+          WHERE a.path @> m.path
+        ) AS ancestors,
+        ROW_NUMBER() OVER (ORDER BY m.path) AS rn
+    FROM KeywordLtree AS m
+  ) 
+SELECT cte.id, cte.value,
+       2 * rn - ancestors AS lft,
+       2 * rn - ancestors + 2 * descendants - 1 AS rgt
+FROM cte
+ORDER BY path;
