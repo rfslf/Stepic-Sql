@@ -1,0 +1,6 @@
+WITH RECURSIVE SG(id, parent_id, value, lvl, path, cycle) AS (
+ SELECT K.id, K.parent_id, K.value, 1, ARRAY[K.id], false FROM Keyword k
+ UNION ALL
+ SELECT K.id, K.parent_id, K.value, 1+s.lvl, path||K.id, K.id = ANY(path) FROM Keyword k, SG s WHERE K.id=S.parent_id AND NOT cycle
+)
+SELECT id, COUNT(id) as subtree_size FROM SG GROUP BY id ORDER BY subtree_size DESC;
