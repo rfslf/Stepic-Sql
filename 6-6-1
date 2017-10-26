@@ -1,0 +1,1 @@
+select r.value, (select count(*)from t) FROM (select count(*) rank, t1.value from t t1, t t2 where t1.value>=t2.value group by t1.value order by rank) r WHERE r.rank=(select (count(*)+1)/2 FROM t);
