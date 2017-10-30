@@ -1,5 +1,6 @@
 -- здесь можно создавать индексы, если угодно
--- CREATE INDEX idx1 ON Commander(name);
+CREATE INDEX idx_bk_pxid ON booking(pax_id);
+CREATE INDEX idx_bk_flid ON booking(flight_id);
 
 -- Сигнатуру функции менять нельзя
 CREATE OR REPLACE FUNCTION Benchmark3(_commander_name TEXT, _pax_count INT)
