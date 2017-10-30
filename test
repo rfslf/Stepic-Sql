@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION Benchmark3(_commander_name TEXT, _pax_count INT)
+CREATE OR REPLACE FUNCTION Benchmark(_commander_name TEXT, _pax_count INT)
 RETURNS TABLE(flight_id INT, commander_name TEXT, pax_count INT) AS $$
 
 SELECT id, name, pax_count FROM (
