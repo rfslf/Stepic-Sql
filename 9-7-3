@@ -1,0 +1,23 @@
+
+CREATE INDEX idx_boo_fl ON booking(flight_id);
+
+CREATE OR REPLACE FUNCTION GetPaxCount(_planet_id INT, _class INT) RETURNS BIGINT AS $$
+SELECT COUNT(Pax.id)
+FROM Planet P JOIN Flight F ON P.id=F.planet_id
+JOIN Booking B ON B.flight_id = F.id
+JOIN Spacecraft S ON F.spacecraft_id = S.id
+JOIN Pax ON B.pax_id = Pax.id
+WHERE S.class = _class AND P.id = _planet_id;
+$$ LANGUAGE SQL IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION Benchmark2()
+RETURNS TABLE(planet_id INT, spacecraft_class INT, takings BIGINT) AS $$
+
+SELECT p.id AS planet_id, s.class AS spacecraft_class, COUNT(1)*pr.price
+FROM Planet P JOIN Flight F ON P.id=F.planet_id
+JOIN Booking B ON B.flight_id = F.id
+JOIN Spacecraft S ON F.spacecraft_id = S.id
+JOIN Pax ON B.pax_id = Pax.id
+JOIN price pr ON pr.planet_id = p.id AND pr.spacecraft_class = S.class GROUP BY s.class, p.id, pr.price
+;
+$$ LANGUAGE SQL IMMUTABLE;
