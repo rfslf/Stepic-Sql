@@ -1,5 +1,6 @@
 -- Здесь можно сделать что-нибудь до начала теста
--- CREATE INDEX idx1 ON Commander(name);
+CREATE INDEX idx_bk_pxid ON booking(pax_id);
+CREATE INDEX idx_bk_flid ON booking(flight_id);
 
 -------- Запрос, нуждающийся в оптимизации
 -- 
