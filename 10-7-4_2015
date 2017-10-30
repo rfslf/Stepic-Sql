@@ -4,8 +4,7 @@
 -- Сигнатуру функции менять нельзя
 CREATE OR REPLACE FUNCTION Benchmark3(_commander_name TEXT, _pax_count INT)
 RETURNS TABLE(flight_id INT, commander_name TEXT, pax_count INT) AS $$
-
-WITH CTE AS(
+WITH CTE(flight_id, commander_name, pax_count) AS(
   SELECT F.id, C.name, COUNT(P.id)::INT AS pax_count
   FROM Commander C
   JOIN Flight F ON F.commander_id=C.id
@@ -14,8 +13,9 @@ WITH CTE AS(
   WHERE F.date BETWEEN '2084-04-01' AND '2084-05-01'
   AND P.race='Men'
   GROUP BY F.id, C.name)
-SELECT id, name, pax_count
+SELECT flight_id,commander_name, pax_count
   FROM CTE
-  WHERE CTE.name = _commander_name
-  AND CTE.pax_count>_pax_count;
+  WHERE CTE.commander_name = _commander_name
+AND CTE.pax_count>_pax_count;
+
 $$ LANGUAGE SQL IMMUTABLE;
