@@ -1,0 +1,22 @@
+-- Здесь можно сделать что-нибудь до начала теста
+-- CREATE INDEX idx1 ON Commander(name);
+
+-------- Запрос, нуждающийся в оптимизации
+-- 
+-- Запрос будет получать параметры commander_name и pax_count
+
+-- Названия и типы возвращаемых столбцов:
+-- TABLE(flight_id INT, commander_name TEXT, pax_count INT)
+WITH CTE AS(
+  SELECT F.id, C.name, COUNT(P.id)::INT AS pax_count
+  FROM Commander C
+  JOIN Flight F ON F.commander_id=C.id
+  JOIN Booking B ON B.flight_id = F.id
+  JOIN Pax P ON B.pax_id=P.id
+  WHERE F.date BETWEEN '2084-04-01' AND '2084-05-01'
+  AND P.race='Men'
+  GROUP BY F.id, C.name)
+SELECT id, name, pax_count
+  FROM CTE
+  WHERE CTE.name = _commander_name
+  AND CTE.pax_count>_pax_count;
