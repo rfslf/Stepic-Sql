@@ -8,7 +8,7 @@ CREATE INDEX idx_bk_flid ON booking(flight_id);
 
 -- Названия и типы возвращаемых столбцов:
 -- TABLE(flight_id INT, commander_name TEXT, pax_count INT)
-WITH CTE AS(
+WITH CTE(flight_id, commander_name, pax_count) AS(
   SELECT F.id, C.name, COUNT(P.id)::INT AS pax_count
   FROM Commander C
   JOIN Flight F ON F.commander_id=C.id
