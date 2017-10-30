@@ -12,7 +12,7 @@ $$ LANGUAGE SQL IMMUTABLE;
 CREATE OR REPLACE FUNCTION Benchmark2()
 RETURNS TABLE(planet_id INT, spacecraft_class INT, takings BIGINT) AS $$
 
-SELECT p.id AS planet_id, s.class AS spacecraft_class, COUNT(Pax.id)*pr.price
+SELECT p.id AS planet_id, s.class AS spacecraft_class, COUNT(1)*pr.price
 FROM Planet P JOIN Flight F ON P.id=F.planet_id
 JOIN Booking B ON B.flight_id = F.id
 JOIN Spacecraft S ON F.spacecraft_id = S.id
