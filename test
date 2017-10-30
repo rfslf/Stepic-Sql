@@ -1,0 +1,19 @@
+CREATE OR REPLACE FUNCTION Benchmark3(_commander_name TEXT, _pax_count INT)
+RETURNS TABLE(flight_id INT, commander_name TEXT, pax_count INT) AS $$
+
+SELECT id, name, pax_count FROM (
+    SELECT F.id, C.name
+    FROM Commander C
+    JOIN Flight F ON F.commander_id=C.id
+    WHERE F.date BETWEEN '2084-04-01' AND '2084-04-15'
+    AND C.name = _commander_name
+) R
+JOIN (
+    SELECT F.id, COUNT(P.id)::INT AS pax_count
+    FROM Flight F
+    JOIN Booking B ON B.flight_id = F.id
+    JOIN Pax P ON B.pax_id=P.id
+    WHERE P.race='Men'
+    GROUP BY F.id
+) T USING(id) WHERE T.pax_count>_pax_count;
+$$ LANGUAGE SQL IMMUTABLE;
