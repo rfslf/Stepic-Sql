@@ -1,0 +1,60 @@
+WITH DINO AS (select id, name, wiki_jsonb from planet WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
+Select id, name FROM DINO;
+-- все планеты с дино
+
+WITH DINO AS (select id, name, wiki_jsonb from planet WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
+Select DINO.id, name, commander_id FROM DINO JOIN Flight ON Flight.Planet_id = DINO.id GROUP BY DINO.id, name, commander_id ORDER BY commander_id, name;
+-- все id капитанов на всех планетах с дино
+
+WITH DINO AS (select id, name, wiki_jsonb from planet WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
+Select DINO.id, DINO.name as Pnm, Commander.name as Cnm
+FROM DINO JOIN Flight ON Flight.Planet_id = DINO.id 
+JOIN Commander ON Flight.commander_id=Commander.id 
+GROUP BY DINO.id, Pnm, Cnm ORDER BY Cnm, Pnm;
+-- все капитаны на всех планетах с дино
+
+
+WITH DINO AS (select id, name, wiki_jsonb from planet WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
+Select DINO.id, DINO.name as Pnm, Commander.name as Cnm, (SELECT * FROM CommanderAchievements WHERE DATA) AS rating 
+FROM DINO JOIN Flight ON Flight.Planet_id = DINO.id 
+JOIN Commander ON Flight.commander_id=Commander.id
+JOIN CommanderAchievements ON CommanderAchievements.commander_id=Commander.id
+GROUP BY DINO.id, Pnm, Cnm, data ORDER BY Cnm, Pnm;
+-- все капитаны на всех планетах с дино и их ачивки
+
+WITH DINO AS (select id, name, wiki_jsonb from planet WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
+Select DINO.id, DINO.name as Pnm, Commander.name as Cnm, data->'rating' 
+FROM DINO JOIN Flight ON Flight.Planet_id = DINO.id 
+JOIN Commander ON Flight.commander_id=Commander.id
+JOIN CommanderAchievements ON CommanderAchievements.commander_id=Commander.id
+GROUP BY DINO.id, Pnm, Cnm, data ORDER BY Cnm, Pnm;
+-- все капитаны на всех планетах с дино и их рейтинг
+
+WITH DINO AS (select id, name, wiki_jsonb from planet WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
+Select array_agg(DINO.name) as Pnm, Commander.name as Cnm, data->'rating'::TEXT 
+FROM DINO JOIN Flight ON Flight.Planet_id = DINO.id 
+JOIN Commander ON Flight.commander_id=Commander.id
+JOIN CommanderAchievements ON CommanderAchievements.commander_id=Commander.id
+GROUP BY Cnm,data ORDER BY Cnm, Pnm;
+-- все капитаны на всех планетах с дино и их рейтинг в массиве с повторениями
+
+{"rating": "Elite", "selfies": [{"planet": "Интеропия", "with": "dino"}]}
+json_build_object('foo',1,'bar',2)
+json_build_object()
+
+
+WITH DINO AS (select id, name, wiki_jsonb from planet WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
+Select array_agg(DISTINCT(DINO.name)) as Pnm, Commander.name as Cnm, data->'rating'::TEXT 
+FROM DINO JOIN Flight ON Flight.Planet_id = DINO.id 
+JOIN Commander ON Flight.commander_id=Commander.id
+JOIN CommanderAchievements ON CommanderAchievements.commander_id=Commander.id
+GROUP BY Cnm,data ORDER BY Cnm, Pnm;
+-- все капитаны на всех планетах с дино и их рейтинг в массиве уник
+
+
+
+
+
+
+
+
