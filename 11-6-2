@@ -1,0 +1,8 @@
+WITH DNG AS (select id, wiki from Planet WHERE wiki->'danger' = '1')
+Select 'mosquitoes' AS tag,COUNT(wiki) FROM DNG WHERE wiki->'mosquitoes'='1'
+UNION (Select 'dinosaurs' AS tag,COUNT(wiki) FROM DNG WHERE wiki->'dinosaurs'='1')
+UNION (Select 'weapons' AS tag,COUNT(wiki) FROM DNG WHERE wiki->'weapons'='1')
+UNION (Select 'pirates' AS tag,COUNT(wiki) FROM DNG WHERE wiki->'pirates'='1')
+UNION (Select 'earthquakes' AS tag,COUNT(wiki) FROM DNG WHERE wiki->'earthquakes'='1')
+UNION (Select 'crime' AS tag,COUNT(wiki) FROM DNG WHERE wiki->'crime'='1')
+ORDER BY count DESC LIMIT 1;
