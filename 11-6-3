@@ -40,7 +40,7 @@ GROUP BY Cnm,data ORDER BY Cnm, Pnm;
 
 {"rating": "Elite", "selfies": [{"planet": "Интеропия", "with": "dino"}]}
 json_build_object('foo',1,'bar',2)
-json_build_object()
+json_build_object("rating", rating, "selfies", [{"planet": pnm, "with": "dino"}]} )
 
 
 WITH DINO AS (select id, name, wiki_jsonb from planet WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
@@ -52,7 +52,13 @@ GROUP BY Cnm,data ORDER BY Cnm, Pnm;
 -- все капитаны на всех планетах с дино и их рейтинг в массиве уник
 
 
-
+WITH DINO AS (select id, name, wiki_jsonb from planet WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
+Select json_build_object("rating", rating, "selfies", [{"planet": array_agg(DINO.name) , "with": "dino"}]}), Commander.name as Cnm, data->'rating'::TEXT 
+FROM DINO JOIN Flight ON Flight.Planet_id = DINO.id 
+JOIN Commander ON Flight.commander_id=Commander.id
+JOIN CommanderAchievements ON CommanderAchievements.commander_id=Commander.id
+GROUP BY Cnm,data ORDER BY Cnm, Pnm;
+json_build_object("rating", rating, "selfies", [{"planet": pnm, "with": "dino"}]})
 
 
 
