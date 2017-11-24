@@ -53,14 +53,56 @@ GROUP BY Cnm,data ORDER BY Cnm, Pnm;
 
 
 WITH DINO AS (select id, name, wiki_jsonb from planet WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
-Select json_build_object("rating", rating, "selfies", [{"planet": array_agg(DINO.name) , "with": "dino"}]}), Commander.name as Cnm, data->'rating'::TEXT 
+Select jsonb_pretty(jsonb_agg(jsonb_build_object('planet', DINO.name, 'with', 'dino'))), Commander.name as Cnm, data->'rating'::TEXT 
 FROM DINO JOIN Flight ON Flight.Planet_id = DINO.id 
 JOIN Commander ON Flight.commander_id=Commander.id
 JOIN CommanderAchievements ON CommanderAchievements.commander_id=Commander.id
-GROUP BY Cnm,data ORDER BY Cnm, Pnm;
-json_build_object("rating", rating, "selfies", [{"planet": pnm, "with": "dino"}]})
+GROUP BY Cnm,data ORDER BY Cnm;
+-- все капитаны на всех планетах с дино и селфи в jsonb
+
+WITH DINO AS (select id, name, wiki_jsonb from planet WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
+SELECT jsonb_build_object('rating', data->'rating'::TEXT,'selfies', jsonb_agg(jsonb_build_object('planet', DINO.name, 'with', 'dino'))), Commander.name as Cnm 
+FROM DINO JOIN Flight ON Flight.Planet_id = DINO.id 
+JOIN Commander ON Flight.commander_id=Commander.id
+JOIN CommanderAchievements ON CommanderAchievements.commander_id=Commander.id
+GROUP BY Cnm,data ORDER BY Cnm;
+-- все капитаны на всех планетах с дино и селфи и уровнем в jsonb
+
+WITH DINO AS
+(select planet.id, name, (jsonb_array_elements((wiki_jsonb->>'log')::jsonb))->>'commander' as commander
+from planet
+WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
+SELECT * FROM DINO;
+-- все капитаны на планетах с dino где есть запись в журнале
+
+WITH MSG AS(
+  WITH DINO AS(
+    select name, (jsonb_array_elements((wiki_jsonb->>'log')::jsonb))->>'commander' as commander
+    from planet
+    WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
+  SELECT commander.id, jsonb_build_object('selfies', jsonb_agg(jsonb_build_object('planet', DINO.name, 'with', 'dino'))) as selfies 
+  FROM DINO JOIN Commander
+  ON DINO.commander=Commander.name
+  GROUP BY commander.id)
+SELECT MSG.id, (MSG.selfies)||(CommanderAchievements.data-'selfies')
+FROM MSG JOIN CommanderAchievements
+ON MSG.id=CommanderAchievements.commander_id;
+-- все капитаны на планетах с dino с есть запись в журнале и готовой записью о селфи 
 
 
-
-
+--WORKS FINE
+WITH MSG AS(
+  WITH DINO AS(
+    -- имя планеты и командира из бортового журнала с планет с динозаврами
+    SELECT name, (jsonb_array_elements((wiki_jsonb->>'log')::jsonb))->>'commander' as commander
+    FROM planet
+    WHERE wiki_jsonb @> '{"features": {"dinosaurs": "1"}}')
+  -- id командира с записью selfies в json
+  SELECT commander.id, jsonb_build_object('selfies', jsonb_agg(jsonb_build_object('planet', DINO.name, 'with', 'dino'))) as selfies 
+  FROM DINO JOIN Commander ON DINO.commander=Commander.name
+  GROUP BY commander.id)
+-- склейка json
+SELECT MSG.id, (MSG.selfies)||(CommanderAchievements.data-'selfies') as data
+FROM MSG JOIN CommanderAchievements
+ON MSG.id=CommanderAchievements.commander_id;
 
