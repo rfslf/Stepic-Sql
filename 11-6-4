@@ -1,0 +1,74 @@
+'''
+если заново начнут делиться шарды, то это плохая логика шардирования
+'''
+
+
+req_limit = 100    # Предел количества запросов/с на шард
+req_time = 300     # Предельная продолжительность нагрузки
+clients_q = 300    # Количество клиентов
+timestamp = 1
+# Время старта системы
+req_delta = 1      # Дискретность времени в секундах
+time_limit = 3000  # Сколько секунд эмулируем
+
+split = 0
+to_split = 0
+
+print('timestamp', 'shard spliting')
+print('----------------------')
+
+# шарды {номер шарда: [[от,до][ количесво запросов, вермя перегрузки]], ...}
+shards = {1:[set(int(i) for i in range(timestamp,10000)),[0,0]]}
+clients = {i:[] for i in range(0,clients_q)}
+
+while timestamp < time_limit:
+    for client in clients.keys():
+        if client < timestamp/10:
+            clients[client] = set(int(i) for i in range(timestamp - (client + 1) * 10, timestamp - client * 10))
+#           [NOW - (N+1)*10, NOW - N*10)
+        else:
+            clients[client] = set(int(i) for i in range(max(0, timestamp - 10), timestamp + 1))
+#           [MAX(0, NOW - 10), NOW]
+
+    for shard in shards.keys():
+        shards[shard][1][0] = 0
+        for client in clients.keys():
+            if clients[client] & shards[shard][0]:
+                shards[shard][1][0] += 1
+
+        if shards[shard][1][0] >= req_limit:
+            shards[shard][1][1] += 1
+        else:
+            shards[shard][1][1] = 0
+        # ищем кого поделить
+        if shards[shard][1][1] >= req_time:
+            to_split = int(shard)
+
+
+    if to_split:
+        print('{:>5}: {:>4} -->'.format(timestamp,to_split), end=' ')
+        # запомним этот момент
+        finish = timestamp
+        # делим шард пополам
+        new_key = int(str(to_split) + str(split))
+        split += 1
+        shards[new_key] = [set(), []]
+
+        # вычисление половин
+        split_set = list(shards[to_split][0])
+        rng = len(split_set)
+        if rng % 2 == 0:
+            calc_low = split_set[0:int(rng/2)+1]
+            calc_up = split_set[int(rng/2)+1:]
+        else:
+            calc_low = split_set[0:int((rng+1)/2)]
+            calc_up = split_set[int((rng+1)/2):]
+        shards[to_split] = [set(calc_up), [0, 0]]
+        shards[new_key] = [set(calc_low), [0, 0]]
+        print(new_key)
+        to_split = 0
+    timestamp += req_delta
+
+
+print('----------------------')
+print('Answer:', int(finish/60))
