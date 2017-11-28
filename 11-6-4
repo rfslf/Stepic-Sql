@@ -1,7 +1,7 @@
 '''
-если заново начнут делиться шарды, то это плохая логика шардирования
+если заново начнут делиться шарды (с 1ого), то это плохая логика шардирования, и за ответ это не принимать
 '''
-
+from math import ceil
 
 req_limit = 100    # Предел количества запросов/с на шард
 req_time = 300     # Предельная продолжительность нагрузки
@@ -14,8 +14,8 @@ time_limit = 3000  # Сколько секунд эмулируем
 split = 0
 to_split = 0
 
-print('timestamp', 'shard spliting')
-print('----------------------')
+print('timestamp|', 'shard spliting')
+print('---------------------------')
 
 # шарды {номер шарда: [[от,до][ количесво запросов, вермя перегрузки]], ...}
 shards = {1:[set(int(i) for i in range(timestamp,10000)),[0,0]]}
@@ -46,7 +46,7 @@ while timestamp < time_limit:
 
 
     if to_split:
-        print('{:>5}: {:>4} -->'.format(timestamp,to_split), end=' ')
+        print('{:^9}|  {:>4} -->'.format(timestamp,to_split), end=' ')
         # запомним этот момент
         finish = timestamp
         # делим шард пополам
@@ -70,5 +70,5 @@ while timestamp < time_limit:
     timestamp += req_delta
 
 
-print('----------------------')
-print('Answer:', int(finish/60))
+print('---------------------------')
+print('Answer:', ceil(finish/60))
